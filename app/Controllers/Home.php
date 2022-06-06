@@ -2,15 +2,41 @@
 
 namespace App\Controllers;
 
-class Home extends BaseController
+use App\Models\usuarios;
+    class Home extends BaseController
 {
     public function index()
     {
-        return view('login');
+        $mensaje = session('mensaje');
+        return view('login',["mensaje" => mensaje]);
     }
 
     public function inicio(){
         return view('inicio');
+    }
+
+    public function login(){
+        $usuario = $this->request->getPost('usuario');
+        $password = $this->request->getPost('password');
+
+        $Usuario = new Usuario();
+
+        $datosUsuario = $Usuario->obtenerUsuario(['usuario' => $usuario]);
+
+        if(count($datosUsuario) > 0 && password_verify($password, $datosUsuario[0]['password'])){
+            
+            $data = [
+                "usuario" => $datosUsuario[0]['usuario'],
+                "rol" => $datosUsuario[0]['rol']
+            ];
+            $session = new session();
+            $session->set($data);
+
+            return redirect()->to(base_url('/inicio'))->with('mensaje','1');
+            
+        }else{
+            return redirect()->to(base_url('/'))->with('mensaje','1');
+        }
     }
 }
 
